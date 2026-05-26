@@ -11,5 +11,23 @@
     ],
     "inStock": true,
     "createdAt": "2026-05-26T17:26:42.344Z"
+  },
+  {
+    "id": "nekles",
+    "slug": "nekles",
+    "name": "nekles",
+    "nameEn": "",
+    "description": "মূল্য",
+    "descriptionEn": "",
+    "price": 30,
+    "discountPercent": 3,
+    "category": "necklace",
+    "images": [
+      "public/images/1779823718130-pic1.jpg"
+    ],
+    "inStock": true,
+    "stock": 1,
+    "isPublished": true,
+    "createdAt": "2026-05-26T19:28:07.037Z"
   }
 ]

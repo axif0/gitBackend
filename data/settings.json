@@ -2,7 +2,7 @@
   "siteName": "পাঁচমিশালি",
   "siteNameEn": "Pachmishali",
   "tagline": "সকলের জন্য কম দামে ভালো মানের পণ্য দেয়ার প্রতিজ্ঞায়",
-  "logoUrl": "",
+  "logoUrl": "public/images/logo.jpg",
   "faviconUrl": "",
   "bkashNumber": "",
   "phone": "",
@@ -12,7 +12,7 @@
   "tiktokUrl": "https://tiktok.com/@pachmishali_100",
   "deliveryCharge": 120,
   "freeDeliveryThreshold": 1500,
-  "metaDescription": "সকলের জন্য কম দামে ভালো মানের পণ্য — পাঁচমিশালি, নীলফামারী",
+  "metaDescription": "সকলের জন্য কম দামে ভালো মানের পণ্য — পাঁচমিশালি",
   "announcementBar": "🚚 সারা বাংলাদেশে Cash on Delivery | 48–72 ঘণ্টায় ডেলিভারি",
   "ogImageUrl": ""
 }
