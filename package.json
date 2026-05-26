@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@octokit/rest": "^20.0.2",
-    "isomorphic-dompurify": "^3.14.0",
-    "jose": "^6.2.3",
     "next": "14.2.21",
     "react": "^18",
     "react-dom": "^18",
