@@ -10,8 +10,9 @@ export async function GET() {
   try {
     const orders = await getOrders();
     return NextResponse.json(orders);
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+  } catch (err) {
+    console.error('Orders GET error:', err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
   }
 }
 

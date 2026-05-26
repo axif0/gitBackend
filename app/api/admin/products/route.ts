@@ -14,8 +14,9 @@ export async function GET() {
   try {
     const products = await getProducts();
     return NextResponse.json(products);
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+  } catch (err) {
+    console.error('Products GET error:', err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
 
