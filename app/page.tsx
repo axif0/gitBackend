@@ -39,31 +39,31 @@ export default async function HomePage() {
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }} />
 
-      {/* ═══ HERO ═══ */}
+      {/* Hero */}
       <HeroBanner settings={settings} />
 
-      {/* ═══ FEATURES STRIP ═══ */}
-      <section className="py-6" style={{ background: 'linear-gradient(90deg, #6B1F35, #A0384F, #6B1F35)' }}>
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-8 sm:gap-16 text-white/90 text-sm font-bengali">
-          <span className="flex items-center gap-2">🚚 ৪৮–৭২ ঘণ্টায় ডেলিভারি</span>
-          <span className="flex items-center gap-2">💰 Cash on Delivery</span>
-          <span className="flex items-center gap-2">✅ ১০০% আসল পণ্য</span>
-          <span className="flex items-center gap-2">🔄 ৭ দিন রিটার্ন</span>
+      {/* Features Strip */}
+      <section className="py-4 sm:py-6" style={{ background: 'linear-gradient(90deg, var(--rose), var(--sakura-dark), var(--rose))' }}>
+        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-4 sm:gap-8 md:gap-16 text-white/90 text-xs sm:text-sm font-bengali">
+          <span className="flex items-center gap-1.5 sm:gap-2">🚚 ৪৮–৭২ ঘণ্টায় ডেলিভারি</span>
+          <span className="flex items-center gap-1.5 sm:gap-2">💰 Cash on Delivery</span>
+          <span className="flex items-center gap-1.5 sm:gap-2">✅ ১০০% আসল পণ্য</span>
+          <span className="flex items-center gap-1.5 sm:gap-2">🔄 ৭ দিন রিটার্ন</span>
         </div>
       </section>
 
-      {/* ═══ ON SALE ═══ */}
+      {/* On Sale */}
       {onSale.length > 0 && (
-        <section className="py-20" style={{ background: 'linear-gradient(180deg, #FDF6F9 0%, #FEFAF5 100%)' }}>
+        <section className="py-12 sm:py-16 md:py-20" style={{ background: 'var(--bg-primary)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-10">
+            <div className="flex justify-between items-end mb-6 sm:mb-10">
               <div>
-                <span className="text-sm tracking-[3px] uppercase font-serif-it" style={{ color: '#B8860B' }}>Limited Offer</span>
-                <h2 className="text-3xl sm:text-4xl font-bengali font-bold text-deep-rose mt-2">অফার পণ্য</h2>
+                <span className="text-xs sm:text-sm tracking-[2px] sm:tracking-[3px] uppercase font-serif-it" style={{ color: 'var(--gold)' }}>Limited Offer</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bengali font-bold mt-1 sm:mt-2" style={{ color: 'var(--rose)' }}>অফার পণ্য</h2>
               </div>
-              <Link href="/shop" className="text-sm font-bengali text-sakura-600 hover:text-sakura-400 transition-colors">সব দেখুন →</Link>
+              <Link href="/shop" className="text-xs sm:text-sm font-bengali transition-colors" style={{ color: 'var(--sakura-dark)' }}>সব দেখুন →</Link>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {onSale.map((product, i) => <ProductCard key={product.id} product={product} index={i} />)}
             </div>
           </div>
@@ -72,21 +72,19 @@ export default async function HomePage() {
 
       <SakuraDivider />
 
-      {/* ═══ EARRINGS SHOWCASE ═══ */}
+      {/* Earrings Showcase */}
       {earrings.length > 0 && (
-        <section className="py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #2D1B22 0%, #1a0a10 50%, #2D1B22 100%)' }}>
-          {/* Ambient glow */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #B8860B, transparent)', filter: 'blur(100px)' }} />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #D4748D, transparent)', filter: 'blur(80px)' }} />
+        <section className="py-12 sm:py-16 md:py-20 relative overflow-hidden" style={{ background: 'var(--bg-footer)' }}>
+          <div className="absolute top-0 right-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full opacity-10" style={{ background: 'radial-gradient(circle, var(--gold), transparent)', filter: 'blur(100px)' }} />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center mb-12">
-              <span className="text-sm tracking-[3px] uppercase font-serif-it" style={{ color: '#B8860B' }}>Earring Collection</span>
-              <h2 className="text-3xl sm:text-4xl font-bengali font-bold text-white mt-3">ইয়াররিং কালেকশন</h2>
-              <p className="text-sm mt-3 font-bengali" style={{ color: '#D4748D' }}>আপনার সৌন্দর্যে নতুন রূপ দিন</p>
+            <div className="text-center mb-8 sm:mb-12">
+              <span className="text-xs sm:text-sm tracking-[2px] sm:tracking-[3px] uppercase font-serif-it" style={{ color: 'var(--gold)' }}>Earring Collection</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bengali font-bold text-white mt-2 sm:mt-3">ইয়াররিং কালেকশন</h2>
+              <p className="text-xs sm:text-sm mt-2 sm:mt-3 font-bengali" style={{ color: 'var(--sakura)' }}>আপনার সৌন্দর্যে নতুন রূপ দিন</p>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {earrings.map((product, i) => (
                 <div key={product.id} className={i === 0 ? 'lg:row-span-2 lg:col-span-1' : ''}>
                   <ProductCard product={product} index={i} />
@@ -94,8 +92,8 @@ export default async function HomePage() {
               ))}
             </div>
 
-            <div className="text-center mt-10">
-              <Link href="/shop" className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-bengali font-semibold text-white transition-all duration-300 hover:scale-105" style={{ background: 'linear-gradient(135deg, #B8860B, #9A7009)', boxShadow: '0 4px 20px rgba(184,134,11,0.3)' }}>
+            <div className="text-center mt-8 sm:mt-10">
+              <Link href="/shop" className="inline-flex items-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-bengali font-semibold text-white text-sm sm:text-base transition-all duration-300 hover:scale-105" style={{ background: 'var(--gold)', boxShadow: 'var(--shadow-gold)' }}>
                 সব ইয়াররিং দেখুন
               </Link>
             </div>
@@ -103,36 +101,35 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ═══ FEATURED ═══ */}
-      <section className="py-20" style={{ background: '#FEFAF5' }}>
+      {/* Featured */}
+      <section className="py-12 sm:py-16 md:py-20" style={{ background: 'var(--bg-secondary)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-sm tracking-[3px] uppercase font-serif-it" style={{ color: '#B8860B' }}>Our Collection</span>
-            <h2 className="text-3xl sm:text-4xl font-bengali font-bold text-deep-rose mt-3">আমাদের কালেকশন</h2>
-            <p className="text-sm mt-3 font-bengali text-sakura-400">সুন্দর ও মানসম্পন্ন গহনা</p>
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="text-xs sm:text-sm tracking-[2px] sm:tracking-[3px] uppercase font-serif-it" style={{ color: 'var(--gold)' }}>Our Collection</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bengali font-bold mt-2 sm:mt-3" style={{ color: 'var(--rose)' }}>আমাদের কালেকশন</h2>
+            <p className="text-xs sm:text-sm mt-2 sm:mt-3 font-bengali" style={{ color: 'var(--text-muted)' }}>সুন্দর ও মানসম্পন্ন গহনা</p>
           </div>
           {featured.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {featured.map((product, i) => <ProductCard key={product.id} product={product} index={i} />)}
             </div>
           ) : (
-            <p className="text-center text-sakura-400 py-12 font-bengali">শীঘ্রই নতুন পণ্য আসছে!</p>
+            <p className="text-center py-12 font-bengali" style={{ color: 'var(--text-muted)' }}>শীঘ্রই নতুন পণ্য আসছে!</p>
           )}
         </div>
       </section>
 
       <SakuraDivider />
 
-      {/* ═══ REVIEWS ═══ */}
+      {/* Reviews */}
       <ReviewCarousel />
 
-      {/* ═══ CTA SECTION ═══ */}
-      <section className="py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #6B1F35, #A0384F, #6B1F35)' }}>
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+      {/* CTA */}
+      <section className="py-12 sm:py-16 md:py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--rose), var(--sakura-dark), var(--rose))' }}>
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-bengali font-bold text-white mb-4">আজই অর্ডার করুন</h2>
-          <p className="text-lg font-bengali mb-8" style={{ color: '#F2C4D8' }}>সারা বাংলাদেশে Cash on Delivery — ৪৮–৭২ ঘণ্টায় ডেলিভারি</p>
-          <Link href="/shop" className="inline-flex items-center justify-center px-10 py-4 rounded-full font-bengali font-bold text-deep-rose bg-white hover:bg-gold-light transition-all duration-300 hover:scale-105 shadow-lg">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bengali font-bold text-white mb-3 sm:mb-4">আজই অর্ডার করুন</h2>
+          <p className="text-sm sm:text-lg font-bengali mb-6 sm:mb-8" style={{ color: '#F2C4D8' }}>সারা বাংলাদেশে Cash on Delivery — ৪৮–৭২ ঘণ্টায় ডেলিভারি</p>
+          <Link href="/shop" className="inline-flex items-center justify-center px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bengali font-bold transition-all duration-300 hover:scale-105 shadow-lg text-sm sm:text-base" style={{ background: 'white', color: 'var(--rose)' }}>
             শপ করুন
           </Link>
         </div>
