@@ -1,6 +1,36 @@
 /* ═══════════════════════════════════════════
-   পাঁচমিশালি — Premium Sakura Theme
+   পাঁচমিশালি — Premium Sakura Theme + Dark Mode
    ═══════════════════════════════════════════ */
+
+/* ── Cherry Blossom Animations ── */
+
+@keyframes blossomSway {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  25% { transform: rotate(2deg) translateX(2px); }
+  50% { transform: rotate(-1deg) translateX(-1px); }
+  75% { transform: rotate(1.5deg) translateX(1px); }
+}
+
+@keyframes petalDrift {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+  50% { transform: translateY(5px) rotate(10deg); opacity: 0.3; }
+}
+
+.animate-blossom-sway {
+  animation: blossomSway 6s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+.animate-petal-drift {
+  animation: petalDrift 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blossom-sway,
+  .animate-petal-drift {
+    animation: none;
+  }
+}
 
 :root {
   --sakura-50:  #FDF6F9;
@@ -15,7 +45,33 @@
   --ink:          #2D1B22;
 }
 
-/* ── Sakura Background System ── */
+/* ── Dark Mode Variables ── */
+
+.dark {
+  --sakura-50:  #1a0a10;
+  --sakura-100: #2D1B22;
+  --sakura-200: #3d2530;
+  --sakura-400: #D4748D;
+  --sakura-600: #F2C4D8;
+  --deep-rose:  #F2C4D8;
+  --cream:      #2D1B22;
+  --ink:        #F5ECD4;
+}
+
+.dark body {
+  background-color: #1a0a10;
+  color: #F5ECD4;
+}
+
+.dark .bg-sakura-50 { background-color: #1a0a10; }
+.dark .bg-sakura-100 { background-color: #2D1B22; }
+.dark .bg-cream { background-color: #2D1B22; }
+.dark .bg-gold-light { background-color: #3d2530; }
+.dark .bg-deep-rose { background-color: #F2C4D8; }
+.dark .text-deep-rose { color: #F2C4D8; }
+.dark .text-ink { color: #F5ECD4; }
+
+/* ── Sakura Background ── */
 
 .sakura-bg {
   position: fixed;
@@ -24,6 +80,7 @@
   pointer-events: none;
   overflow: hidden;
   background-color: var(--sakura-50);
+  transition: background-color 0.5s ease;
 }
 
 .sakura-pattern-svg {
@@ -38,6 +95,11 @@
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.08;
+  transition: opacity 0.5s ease;
+}
+
+.dark .sakura-orb {
+  opacity: 0.04;
 }
 
 .sakura-corner {
@@ -52,7 +114,11 @@
 .sakura-corner-bl { bottom: 0; left: 0; }
 .sakura-corner-br { bottom: 0; right: 0; transform: scaleX(-1); }
 
-/* ── Falling Petals Animation ── */
+.dark .sakura-corner {
+  opacity: 0.3;
+}
+
+/* ── Falling Petals ── */
 
 .hero-petals {
   position: absolute;
@@ -64,8 +130,6 @@
 .petal {
   position: absolute;
   top: -20px;
-  width: 10px;
-  height: 10px;
   border-radius: 50% 0 50% 0;
   opacity: 0;
   animation: petalFall linear infinite;
@@ -74,8 +138,8 @@
 
 @keyframes petalFall {
   0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
-  10%  { opacity: 0.6; }
-  90%  { opacity: 0.4; }
+  10%  { opacity: 0.5; }
+  90%  { opacity: 0.3; }
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
@@ -83,23 +147,24 @@
   .petal { animation: none; opacity: 0; }
 }
 
-/* ── Premium Card System ── */
+/* ── Shine Sweep ── */
 
-.card-premium {
-  background: var(--cream);
-  border: 1px solid rgba(212, 116, 141, 0.18);
-  border-radius: 16px;
-  box-shadow:
-    0 2px 8px rgba(160, 56, 79, 0.06),
-    0 0 0 1px rgba(184, 134, 11, 0.04);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+.shine-sweep {
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+  animation: shineMove 1.5s ease-in-out;
 }
 
-.card-premium:hover {
-  box-shadow:
-    0 8px 32px rgba(160, 56, 79, 0.14),
-    0 0 0 1px rgba(184, 134, 11, 0.10);
-  transform: translateY(-3px);
+.dark .shine-sweep {
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+}
+
+@keyframes shineMove {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.group:hover .shine-sweep {
+  animation: shineMove 0.8s ease-in-out;
 }
 
 /* ── Price Tag ── */
@@ -111,13 +176,6 @@
   padding: 4px 12px 4px 8px;
 }
 
-/* ── Section Backgrounds ── */
-
-.bg-sakura-50  { background-color: var(--sakura-50); }
-.bg-sakura-100 { background-color: var(--sakura-100); }
-.bg-gold-light { background-color: var(--gold-light); }
-.bg-cream      { background-color: var(--cream); }
-
 /* ── Typography Utilities ── */
 
 .font-display  { font-family: var(--font-display), serif; }
@@ -128,6 +186,37 @@
 .text-gold-primary { color: var(--gold-primary); }
 .text-sakura-600 { color: var(--sakura-600); }
 .text-ink { color: var(--ink); }
+
+.bg-sakura-50  { background-color: var(--sakura-50); }
+.bg-sakura-100 { background-color: var(--sakura-100); }
+.bg-gold-light { background-color: var(--gold-light); }
+.bg-cream      { background-color: var(--cream); }
+.bg-deep-rose  { background-color: var(--deep-rose); }
+
+/* ── Card Dark Mode ── */
+
+.dark .card-premium {
+  background: #2D1B22;
+  border-color: rgba(212,116,141,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.dark .card-premium:hover {
+  box-shadow: 0 8px 32px rgba(184,134,11,0.15);
+}
+
+/* ── Input Dark Mode ── */
+
+.dark .input-field {
+  background: #2D1B22;
+  border-color: rgba(212,116,141,0.2);
+  color: #F5ECD4;
+}
+
+.dark .input-field:focus {
+  border-color: #B8860B;
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.15);
+}
 
 /* ── Shimmer Skeleton ── */
 
@@ -141,6 +230,11 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
+}
+
+.dark .skeleton-premium {
+  background: linear-gradient(90deg, #2D1B22 25%, #3d2530 50%, #2D1B22 75%);
+  background-size: 200% 100%;
 }
 
 /* ── Scrollbar ── */
@@ -157,7 +251,7 @@
   color: var(--deep-rose);
 }
 
-/* ── Page Entry Animation ── */
+/* ── Page Entry ── */
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -168,24 +262,9 @@
   animation: fadeInUp 0.5s ease forwards;
 }
 
-/* ── Hero Branch SVG (sumi-e style) ── */
-
-.hero-branch {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 50%;
-  max-width: 600px;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.12;
-}
+/* ── Responsive ── */
 
 @media (max-width: 768px) {
-  .hero-branch {
-    width: 80%;
-    opacity: 0.06;
-  }
   .sakura-corner {
     width: 100px;
     height: 100px;

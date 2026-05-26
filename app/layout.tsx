@@ -5,11 +5,14 @@ import './globals.css';
 import '@/styles/premium-theme.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import SakuraBackground from '@/components/SakuraBackground';
 import { CartProvider } from '@/contexts/CartContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { getSettings } from '@/lib/settings';
 
 const ToastProvider = dynamic(() => import('@/components/ToastProvider'), { ssr: false });
+const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'), { ssr: false });
+const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), { ssr: false });
+const CherryBlossomGlobal = dynamic(() => import('@/components/CherryBlossomGlobal'), { ssr: false });
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -52,14 +55,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head suppressHydrationWarning>
         {settings.faviconUrl && <link rel="icon" href={settings.faviconUrl} />}
       </head>
-      <body className="font-bengali bg-sakura-50 text-ink antialiased">
-        <SakuraBackground />
-        <CartProvider>
-          <Navbar settings={settings} />
-          <main className="min-h-screen animate-fade-in-up">{children}</main>
-          <Footer settings={settings} />
-          <ToastProvider />
-        </CartProvider>
+      <body className="font-bengali bg-sakura-50 text-ink antialiased dark:bg-[#1a0a10] dark:text-[#F5ECD4] transition-colors duration-500">
+        <ThemeProvider>
+          <CartProvider>
+            <Navbar settings={settings} />
+            <main className="relative min-h-screen animate-fade-in-up">{children}</main>
+            <Footer settings={settings} />
+            <WhatsAppButton />
+            <ThemeToggle />
+            <ToastProvider />
+          </CartProvider>
+          <CherryBlossomGlobal />
+        </ThemeProvider>
       </body>
     </html>
   );
