@@ -57,7 +57,7 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleSubmit = async (product: Product, imageFile?: File | null) => {
+  const handleSubmit = async (product: Product, imageFile?: File | null, isEdit?: boolean) => {
     try {
       let images = product.images;
       if (imageFile) {
@@ -66,8 +66,8 @@ export default function AdminDashboard() {
       }
 
       const payload = { ...product, images };
-      const isEdit = editing !== null;
-      const optimistic = isEdit
+      const editMode = isEdit ?? editing !== null;
+      const optimistic = editMode
         ? products.map((p) => (p.id === product.id ? payload : p))
         : [...products, payload];
 
@@ -76,18 +76,19 @@ export default function AdminDashboard() {
       setEditing(null);
 
       const res = await fetch('/api/admin/products', {
-        method: isEdit ? 'PUT' : 'POST',
+        method: editMode ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        throw new Error('Save failed');
+        const data = await res.json();
+        throw new Error(data.error || 'Save failed');
       }
 
-      toast.success(isEdit ? 'Product updated!' : 'Product added!');
-    } catch {
-      toast.error('Failed to save product');
+      toast.success(editMode ? 'Product updated!' : 'Product added!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save product');
       fetchProducts();
     }
   };

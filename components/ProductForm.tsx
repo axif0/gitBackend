@@ -5,7 +5,7 @@ import { Product } from '@/types/product';
 
 interface Props {
   product?: Product;
-  onSubmit: (product: Product, imageFile?: File | null) => Promise<void>;
+  onSubmit: (product: Product, imageFile?: File | null, isEdit?: boolean) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -34,9 +34,10 @@ export default function ProductForm({ product, onSubmit, onCancel }: Props) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
+    const isCheckbox = type === 'checkbox';
     setForm((prev) => ({
       ...prev,
-      [name]: type === 'number' ? Number(value) : type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : type === 'number' ? Number(value) : value,
     }));
   };
 
@@ -54,7 +55,7 @@ export default function ProductForm({ product, onSubmit, onCancel }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      await onSubmit(form, imageFile);
+      await onSubmit(form, imageFile, !!product);
     } finally {
       setLoading(false);
     }
