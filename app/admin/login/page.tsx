@@ -28,7 +28,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-md">
         <div className="card p-8 shadow-lg">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gold-700 to-gold-500 bg-clip-text text-transparent font-bangla">পাঁচমিশালি</h1>
+            <h1 className="text-3xl font-bold font-bengali" style={{ background: 'linear-gradient(135deg, var(--rose), var(--gold))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>পাঁচমিশালি</h1>
             <p className="text-gray-500 text-sm mt-2">অ্যাডমিন ড্যাশবোর্ড</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">

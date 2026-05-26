@@ -88,7 +88,7 @@ export default function ProductForm({ product, onSubmit, onCancel }: Props) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">বিবরণ *</label>
-        <textarea name="description" value={form.description} onChange={handleChange} rows={4} className="input-field font-bangla" placeholder="পণ্যের বিস্তারিত বিবরণ লিখুন..." required />
+        <textarea name="description" value={form.description} onChange={handleChange} rows={4} className="input-field font-bengali" placeholder="পণ্যের বিস্তারিত বিবরণ লিখুন..." required />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -106,11 +106,11 @@ export default function ProductForm({ product, onSubmit, onCancel }: Props) {
         </div>
         <div className="flex items-end gap-4">
           <label className="flex items-center gap-2">
-            <input name="inStock" type="checkbox" checked={form.inStock} onChange={handleChange} className="h-4 w-4 text-gold-600 rounded" />
+            <input name="inStock" type="checkbox" checked={form.inStock} onChange={handleChange} className="h-4 w-4 text-gold-primary rounded" />
             <span className="text-sm text-gray-700">স্টকে আছে</span>
           </label>
           <label className="flex items-center gap-2">
-            <input name="isPublished" type="checkbox" checked={form.isPublished} onChange={handleChange} className="h-4 w-4 text-gold-600 rounded" />
+            <input name="isPublished" type="checkbox" checked={form.isPublished} onChange={handleChange} className="h-4 w-4 text-gold-primary rounded" />
             <span className="text-sm text-gray-700">প্রকাশিত</span>
           </label>
         </div>

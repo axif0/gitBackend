@@ -58,16 +58,16 @@ export default function AdminSettingsPage() {
   };
 
   if (loading) return <div className="animate-pulse space-y-4">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-16 bg-gray-200 rounded" />)}</div>;
-  if (!settings) return <p className="text-red-500 font-bangla">সেটিংস লোড করা যায়নি</p>;
+  if (!settings) return <p className="text-red-500 font-bengali">সেটিংস লোড করা যায়নি</p>;
 
   return (
     <div className="max-w-4xl mx-auto">
       <Toaster position="top-right" />
-      <h1 className="text-3xl font-bold mb-8 font-bangla">সাইট সেটিংস</h1>
+      <h1 className="text-3xl font-bold mb-8 font-bengali">সাইট সেটিংস</h1>
 
       {/* Logo Section */}
       <div className="card p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 font-bangla">লোগো ও ফ্যাভিকন</h2>
+        <h2 className="text-xl font-semibold mb-4 font-bengali">লোগো ও ফ্যাভিকন</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">লোগো</label>
@@ -87,14 +87,14 @@ export default function AdminSettingsPage() {
 
       {/* Store Info */}
       <div className="card p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 font-bangla">স্টোর তথ্য</h2>
+        <h2 className="text-xl font-semibold mb-4 font-bengali">স্টোর তথ্য</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">শপের নাম (বাংলা)</label><input name="siteName" value={settings.siteName} onChange={handleChange} className="input-field font-bangla" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">শপের নাম (বাংলা)</label><input name="siteName" value={settings.siteName} onChange={handleChange} className="input-field font-bengali" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">শপের নাম (English)</label><input name="siteNameEn" value={settings.siteNameEn} onChange={handleChange} className="input-field" /></div>
-          <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">ট্যাগলাইন</label><input name="tagline" value={settings.tagline} onChange={handleChange} className="input-field font-bangla" /></div>
+          <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">ট্যাগলাইন</label><input name="tagline" value={settings.tagline} onChange={handleChange} className="input-field font-bengali" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">ফোন</label><input name="phone" value={settings.phone} onChange={handleChange} className="input-field" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">bKash নম্বর</label><input name="bkashNumber" value={settings.bkashNumber} onChange={handleChange} className="input-field" /></div>
-          <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">ঠিকানা</label><input name="address" value={settings.address} onChange={handleChange} className="input-field font-bangla" /></div>
+          <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">ঠিকানা</label><input name="address" value={settings.address} onChange={handleChange} className="input-field font-bengali" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL</label><input name="facebookUrl" value={settings.facebookUrl} onChange={handleChange} className="input-field" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Messenger URL</label><input name="messengerUrl" value={settings.messengerUrl} onChange={handleChange} className="input-field" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">TikTok URL</label><input name="tiktokUrl" value={settings.tiktokUrl} onChange={handleChange} className="input-field" /></div>
@@ -103,19 +103,19 @@ export default function AdminSettingsPage() {
 
       {/* Delivery */}
       <div className="card p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 font-bangla">ডেলিভারি সেটিংস</h2>
+        <h2 className="text-xl font-semibold mb-4 font-bengali">ডেলিভারি সেটিংস</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div><label className="block text-sm font-medium text-gray-700 mb-1">ডেলিভারি চার্জ (৳)</label><input name="deliveryCharge" type="number" min="0" value={settings.deliveryCharge} onChange={handleChange} className="input-field" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">ফ্রি ডেলিভারি থ্রেশহোল্ড (৳)</label><input name="freeDeliveryThreshold" type="number" min="0" value={settings.freeDeliveryThreshold} onChange={handleChange} className="input-field" /></div>
-          <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">ঘোষণা বার</label><input name="announcementBar" value={settings.announcementBar} onChange={handleChange} className="input-field font-bangla" /></div>
+          <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">ঘোষণা বার</label><input name="announcementBar" value={settings.announcementBar} onChange={handleChange} className="input-field font-bengali" /></div>
         </div>
       </div>
 
       {/* SEO */}
       <div className="card p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 font-bangla">SEO ডিফল্ট</h2>
+        <h2 className="text-xl font-semibold mb-4 font-bengali">SEO ডিফল্ট</h2>
         <div className="space-y-4">
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">মেটা ডিসক্রিপশন</label><textarea name="metaDescription" value={settings.metaDescription} onChange={handleChange} rows={3} className="input-field font-bangla" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">মেটা ডিসক্রিপশন</label><textarea name="metaDescription" value={settings.metaDescription} onChange={handleChange} rows={3} className="input-field font-bengali" /></div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">OG ইমেজ</label>
             {settings.ogImageUrl && <img src={settings.ogImageUrl} alt="OG" className="h-20 mb-2 rounded" />}

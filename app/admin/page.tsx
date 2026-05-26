@@ -6,7 +6,7 @@ import type { Order } from '@/types/order';
 import dynamic from 'next/dynamic';
 import toast, { Toaster } from 'react-hot-toast';
 
-const ProductForm = dynamic(() => import('@/components/ProductForm'), { loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />, ssr: false });
+const ProductForm = dynamic(() => import('@/components/ProductForm'), { loading: () => <div className="h-96 skeleton rounded-2xl" />, ssr: false });
 const ConfirmModal = dynamic(() => import('@/components/ConfirmModal'), { ssr: false });
 
 export default function AdminDashboard() {
@@ -83,8 +83,7 @@ export default function AdminDashboard() {
     const ids = deleteModal.ids; const prev = products;
     setProducts(products.filter(p => !ids.includes(p.id))); setSelectedIds([]); setDeleteModal({ show: false, ids: [] });
     try {
-      const url = ids.length === 1 ? `/api/admin/products?id=${ids[0]}` : `/api/admin/products?bulk=${JSON.stringify(ids)}`;
-      const res = await fetch(url, { method: 'DELETE', headers: { 'x-csrf-token': csrfToken } });
+      const res = await fetch('/api/admin/products', { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }, body: JSON.stringify({ ids }) });
       if (!res.ok) throw new Error('Delete failed');
       toast.success(`${ids.length}টি পণ্য মুছে ফেলা হয়েছে`);
     } catch { setProducts(prev); toast.error('মুছে ফেলা ব্যর্থ'); }
@@ -108,24 +107,27 @@ export default function AdminDashboard() {
     <div className="max-w-7xl mx-auto">
       <Toaster position="top-right" />
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold font-bangla">ড্যাশবোর্ড</h1>
+        <h1 className="text-3xl font-bold font-bengali" style={{ color: 'var(--text-primary)' }}>ড্যাশবোর্ড</h1>
         <button onClick={() => { setShowForm(true); setEditing(null); }} className="btn-primary">+ পণ্য যোগ</button>
       </div>
 
+      {/* Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">মোট পণ্য</p><p className="text-2xl font-bold text-gold-700">{analytics.totalProducts}</p></div>
-        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">মোট আয়</p><p className="text-2xl font-bold text-green-700">৳{analytics.totalRevenue.toLocaleString()}</p></div>
-        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">পেন্ডিং অর্ডার</p><p className="text-2xl font-bold text-yellow-600">{analytics.pendingOrders}</p></div>
-        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">স্টক শেষ</p><p className="text-2xl font-bold text-red-600">{analytics.outOfStock}</p></div>
+        <div className="card p-5"><p className="text-sm font-bengali" style={{ color: 'var(--text-muted)' }}>মোট পণ্য</p><p className="text-2xl font-bold" style={{ color: 'var(--gold)' }}>{analytics.totalProducts}</p></div>
+        <div className="card p-5"><p className="text-sm font-bengali" style={{ color: 'var(--text-muted)' }}>মোট আয়</p><p className="text-2xl font-bold text-green-500">৳{analytics.totalRevenue.toLocaleString()}</p></div>
+        <div className="card p-5"><p className="text-sm font-bengali" style={{ color: 'var(--text-muted)' }}>পেন্ডিং অর্ডার</p><p className="text-2xl font-bold text-yellow-500">{analytics.pendingOrders}</p></div>
+        <div className="card p-5"><p className="text-sm font-bengali" style={{ color: 'var(--text-muted)' }}>স্টক শেষ</p><p className="text-2xl font-bold text-red-500">{analytics.outOfStock}</p></div>
       </div>
 
+      {/* Product Form */}
       {showForm && (
         <div className="card p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6 font-bangla">{editing ? 'পণ্য আপডেট' : 'নতুন পণ্য'}</h2>
+          <h2 className="text-xl font-semibold mb-6 font-bengali" style={{ color: 'var(--text-primary)' }}>{editing ? 'পণ্য আপডেট' : 'নতুন পণ্য'}</h2>
           <ProductForm product={editing || undefined} onSubmit={handleSubmit} onCancel={() => { setShowForm(false); setEditing(null); }} />
         </div>
       )}
 
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="পণ্য খুঁজুন..." className="input-field flex-1" />
         <select value={categoryFilter} onChange={e => { setCategoryFilter(e.target.value); setPage(1); }} className="input-field w-auto">
@@ -136,38 +138,41 @@ export default function AdminDashboard() {
         {selectedIds.length > 0 && <button onClick={() => setDeleteModal({ show: true, ids: selectedIds })} className="btn-danger">নির্বাচিত মুছুন ({selectedIds.length})</button>}
       </div>
 
+      {/* Products Table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead style={{ background: 'var(--bg-secondary)' }}>
               <tr>
                 <th className="px-4 py-3"><input type="checkbox" checked={selectedIds.length === paginated.length && paginated.length > 0} onChange={() => setSelectedIds(selectedIds.length === paginated.length ? [] : paginated.map(p => p.id))} className="rounded" /></th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">পণ্য</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ক্যাটাগরি</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">মূল্য</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">স্টক</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">প্রকাশিত</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">অ্যাকশন</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>পণ্য</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>ক্যাটাগরি</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>মূল্য</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>স্টক</th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>প্রকাশিত</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>অ্যাকশন</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-4 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse" /></td>)}</tr>) :
-              paginated.length === 0 ? <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500 font-bangla">কোনো পণ্য নেই</td></tr> :
-              paginated.map(p => (
-                <tr key={p.id} className="hover:bg-gray-50">
+            <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
+              {loading ? Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-4 py-4"><div className="h-4 skeleton rounded" /></td>)}</tr>
+              )) : paginated.length === 0 ? (
+                <tr><td colSpan={7} className="px-4 py-12 text-center font-bengali" style={{ color: 'var(--text-muted)' }}>কোনো পণ্য নেই</td></tr>
+              ) : paginated.map(p => (
+                <tr key={p.id} className="hover:opacity-80 transition-opacity">
                   <td className="px-4 py-4"><input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => setSelectedIds(prev => prev.includes(p.id) ? prev.filter(i => i !== p.id) : [...prev, p.id])} className="rounded" /></td>
-                  <td className="px-4 py-4"><p className="font-medium text-gray-900 font-bangla">{p.name}</p><p className="text-xs text-gray-500">{p.slug || p.id}</p></td>
-                  <td className="px-4 py-4 text-sm capitalize">{p.category}</td>
+                  <td className="px-4 py-4"><p className="font-medium font-bengali" style={{ color: 'var(--text-primary)' }}>{p.name}</p><p className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.slug || p.id}</p></td>
+                  <td className="px-4 py-4 text-sm capitalize" style={{ color: 'var(--text-secondary)' }}>{p.category}</td>
                   <td className="px-4 py-4 text-sm">
-                    <div>৳{getFinalPrice(p).toFixed(0)}</div>
-                    {p.discountPercent > 0 && <span className="text-xs text-red-500 line-through">৳{p.price}</span>}
+                    <div style={{ color: 'var(--gold)' }} className="font-medium">৳{getFinalPrice(p).toFixed(0)}</div>
+                    {p.discountPercent > 0 && <span className="text-xs line-through" style={{ color: 'var(--text-muted)' }}>৳{p.price}</span>}
                   </td>
-                  <td className="px-4 py-4 text-center"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${p.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{p.stock > 0 ? p.stock : 'শেষ'}</span></td>
-                  <td className="px-4 py-4 text-center"><button onClick={() => togglePublished(p)} className={`relative w-11 h-6 rounded-full transition-colors ${p.isPublished ? 'bg-green-500' : 'bg-gray-300'}`}><span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${p.isPublished ? 'translate-x-5' : ''}`} /></button></td>
+                  <td className="px-4 py-4 text-center"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${p.stock > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'}`}>{p.stock > 0 ? p.stock : 'শেষ'}</span></td>
+                  <td className="px-4 py-4 text-center"><button onClick={() => togglePublished(p)} className={`relative w-11 h-6 rounded-full transition-colors ${p.isPublished ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}><span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${p.isPublished ? 'translate-x-5' : ''}`} /></button></td>
                   <td className="px-4 py-4"><div className="flex gap-1 flex-wrap">
-                    <button onClick={() => { setEditing(p); setShowForm(true); }} className="text-gold-600 hover:text-gold-800 text-xs font-medium px-2 py-1">এডিট</button>
-                    <button onClick={() => handleDuplicate(p)} className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1">কপি</button>
-                    <button onClick={() => setDeleteModal({ show: true, ids: [p.id] })} className="text-red-600 hover:text-red-800 text-xs font-medium px-2 py-1">মুছুন</button>
+                    <button onClick={() => { setEditing(p); setShowForm(true); }} className="text-xs font-medium px-2 py-1 rounded hover:opacity-80" style={{ color: 'var(--gold)' }}>এডিট</button>
+                    <button onClick={() => handleDuplicate(p)} className="text-xs font-medium px-2 py-1 rounded hover:opacity-80 text-blue-500">কপি</button>
+                    <button onClick={() => setDeleteModal({ show: true, ids: [p.id] })} className="text-xs font-medium px-2 py-1 rounded hover:opacity-80 text-red-500">মুছুন</button>
                   </div></td>
                 </tr>
               ))}
@@ -176,10 +181,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-6">
           {Array.from({ length: totalPages }).map((_, i) => (
-            <button key={i} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-gold-600 text-white' : 'bg-white border hover:bg-gray-50'}`}>{i + 1}</button>
+            <button key={i} onClick={() => setPage(i + 1)} className="px-3 py-1 rounded transition-colors" style={{ background: page === i + 1 ? 'var(--gold)' : 'var(--bg-card)', color: page === i + 1 ? 'white' : 'var(--text-primary)', border: page === i + 1 ? 'none' : '1px solid var(--border)' }}>{i + 1}</button>
           ))}
         </div>
       )}

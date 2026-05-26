@@ -9,20 +9,21 @@ export default function ToastProvider() {
       toastOptions={{
         success: {
           style: {
-            background: '#6B1F35',
-            color: '#FEFAF5',
-            borderLeft: '4px solid #B8860B',
+            background: 'var(--rose)',
+            color: 'var(--text-inverse)',
+            borderLeft: '4px solid var(--gold)',
             borderRadius: '12px',
             fontFamily: 'var(--font-bengali)',
           },
         },
         error: {
           style: {
-            background: '#FAE8F1',
-            color: '#6B1F35',
-            borderLeft: '4px solid #A0384F',
+            background: 'var(--bg-card)',
+            color: 'var(--error)',
+            borderLeft: '4px solid var(--error)',
             borderRadius: '12px',
             fontFamily: 'var(--font-bengali)',
+            border: '1px solid var(--border)',
           },
         },
       }}

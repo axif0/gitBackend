@@ -32,7 +32,7 @@ export default function CheckoutContent() {
   const districts = form.division ? DISTRICTS_BY_DIVISION[form.division] || [] : [];
 
   useEffect(() => {
-    fetch('/api/admin/settings').then(r => r.json()).then(setSettings).catch(() => {});
+    fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
   }, []);
 
   useEffect(() => {

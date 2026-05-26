@@ -48,7 +48,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <Toaster position="top-right" />
-      <h1 className="text-3xl font-bold mb-8 font-bangla">অর্ডার ম্যানেজমেন্ট</h1>
+      <h1 className="text-3xl font-bold mb-8 font-bengali">অর্ডার ম্যানেজমেন্ট</h1>
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="নাম, ফোন, TxID দিয়ে খুঁজুন..." className="input-field flex-1" />
         <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} className="input-field w-auto">
@@ -74,13 +74,13 @@ export default function AdminOrdersPage() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}>{Array.from({ length: 9 }).map((_, j) => <td key={j} className="px-4 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse" /></td>)}</tr>) :
-              paginated.length === 0 ? <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-500 font-bangla">কোনো অর্ডার নেই</td></tr> :
+              paginated.length === 0 ? <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-500 font-bengali">কোনো অর্ডার নেই</td></tr> :
               paginated.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-4 py-4 font-mono text-xs">{order.id}</td>
-                  <td className="px-4 py-4 text-sm font-bangla">{order.customer.fullName}</td>
+                  <td className="px-4 py-4 text-sm font-bengali">{order.customer.fullName}</td>
                   <td className="px-4 py-4 text-sm">{order.customer.phone}</td>
-                  <td className="px-4 py-4 text-sm font-bangla">{order.customer.district}</td>
+                  <td className="px-4 py-4 text-sm font-bengali">{order.customer.district}</td>
                   <td className="px-4 py-4 text-sm text-center">{order.items.length}</td>
                   <td className="px-4 py-4 text-sm text-right font-medium">৳{order.grandTotal.toFixed(0)}</td>
                   <td className="px-4 py-4 text-xs font-mono">{order.bkashTxId}</td>
@@ -98,7 +98,7 @@ export default function AdminOrdersPage() {
       </div>
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: totalPages }).map((_, i) => <button key={i} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-gold-600 text-white' : 'bg-white border hover:bg-gray-50'}`}>{i + 1}</button>)}
+          {Array.from({ length: totalPages }).map((_, i) => <button key={i} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-gold-primary text-white' : 'bg-white border hover:bg-gray-50'}`}>{i + 1}</button>)}
         </div>
       )}
     </div>

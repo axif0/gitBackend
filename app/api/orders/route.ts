@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrders, saveOrders } from '@/lib/github';
+import { verifySession } from '@/lib/security/session';
 import { checkRateLimit } from '@/lib/security/rate-limit';
 import { sanitizeObject } from '@/lib/security/sanitize';
 import { validateRequest, CheckoutSchema } from '@/lib/schemas';
 import type { Order } from '@/types/order';
 import { revalidatePath } from 'next/cache';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Require authentication for viewing orders (contains PII)
+  const session = await verifySession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const orders = await getOrders();
     return NextResponse.json(orders);
@@ -24,7 +31,9 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const sanitized = sanitizeObject(body);
   const validation = validateRequest(CheckoutSchema, sanitized);
-  if (!validation.success) return NextResponse.json({ error: validation.error }, { status: 400 });
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 });
+  }
 
   const now = new Date().toISOString();
   const order: Order = {
@@ -37,14 +46,21 @@ export async function POST(request: NextRequest) {
     promoCode: validation.data.promoCode,
     promoDiscount: validation.data.promoDiscount,
     grandTotal: validation.data.grandTotal,
-    bkashTxId: validation.data.bkashTxId,
+    bkashTxId: validation.data.bkashTxId.toUpperCase(),
     status: 'pending',
-    createdAt: now, updatedAt: now,
+    createdAt: now,
+    updatedAt: now,
   };
 
-  const orders = await getOrders();
-  orders.push(order);
-  await saveOrders(orders);
-  revalidatePath('/admin/orders'); revalidatePath('/sales');
-  return NextResponse.json({ orderId: order.id }, { status: 201 });
+  try {
+    const orders = await getOrders();
+    orders.push(order);
+    await saveOrders(orders);
+    revalidatePath('/admin/orders');
+    revalidatePath('/sales');
+    return NextResponse.json({ orderId: order.id }, { status: 201 });
+  } catch (err) {
+    console.error('Order creation error:', err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+  }
 }

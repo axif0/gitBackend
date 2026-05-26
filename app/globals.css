@@ -2,68 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '../styles/premium-theme.css';
+
 @layer base {
   body {
-    @apply bg-sakura-50 text-ink;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply bg-deep-rose text-cream px-6 py-3 rounded-full font-semibold hover:bg-sakura-600 transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed font-bengali;
-  }
-
-  .btn-secondary {
-    @apply bg-transparent text-sakura-600 border-[1.5px] border-sakura-400 px-6 py-3 rounded-full font-semibold hover:bg-sakura-100 transition-all duration-200 active:scale-[0.97] font-bengali;
-  }
-
-  .btn-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-700 transition-all duration-200 active:scale-[0.97] font-bengali;
-  }
-
-  .btn-gold {
-    @apply bg-gold-primary text-cream px-6 py-3 rounded-full font-semibold hover:bg-[#9A7009] transition-all duration-200 active:scale-[0.97] font-bengali;
-  }
-
-  .input-field {
-    @apply w-full px-4 py-3 border border-sakura-200/60 rounded-xl transition-all duration-200 outline-none bg-cream text-ink font-bengali;
-  }
-
-  .input-field:focus {
-    @apply border-sakura-600 ring-2 ring-sakura-600/10;
-  }
-
-  .card {
-    @apply bg-cream rounded-2xl border border-sakura-200/30 transition-all duration-300;
-    box-shadow: 0 2px 8px rgba(160, 56, 79, 0.06), 0 0 0 1px rgba(184, 134, 11, 0.04);
-  }
-
-  .card:hover {
-    box-shadow: 0 8px 32px rgba(160, 56, 79, 0.14), 0 0 0 1px rgba(184, 134, 11, 0.10);
-    @apply -translate-y-0.5;
-  }
-
-  .badge-discount {
-    @apply absolute top-0 left-0 bg-deep-rose text-cream text-xs font-bold px-3 py-1.5 rounded-br-xl;
-  }
-
-  .skeleton {
-    @apply rounded-lg;
+    @apply antialiased;
+    font-family: var(--font-bengali), sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
 @layer utilities {
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-  }
+  /* Background utilities */
+  .bg-primary { background-color: var(--bg-primary); }
+  .bg-secondary { background-color: var(--bg-secondary); }
+  .bg-card { background-color: var(--bg-card); }
+  .bg-footer { background-color: var(--bg-footer); }
 
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
+  /* Text utilities */
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted { color: var(--text-muted); }
+  .text-accent { color: var(--text-accent); }
+  .text-inverse { color: var(--text-inverse); }
+
+  /* Border utilities */
+  .border-theme { border-color: var(--border); }
+  .border-gold-theme { border-color: var(--border-gold); }
+
+  /* Shadow utilities */
+  .shadow-theme { box-shadow: var(--shadow); }
+  .shadow-gold-theme { box-shadow: var(--shadow-gold); }
 }

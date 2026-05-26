@@ -5,7 +5,7 @@ import { getFinalPrice } from '@/types/product';
 import { getImageUrl } from '@/lib/image-url';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 const PROMO_CODES: Record<string, number> = { 'PACHMISHALI10': 10, 'WELCOME15': 15 };
@@ -15,8 +15,13 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [appliedPromo, setAppliedPromo] = useState('');
+  const [settings, setSettings] = useState<{ deliveryCharge?: number; freeDeliveryThreshold?: number }>({});
 
-  const deliveryCharge = total >= 1500 ? 0 : 120;
+  useEffect(() => {
+    fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
+  }, []);
+
+  const deliveryCharge = total >= (settings.freeDeliveryThreshold || 1500) ? 0 : (settings.deliveryCharge || 120);
   const discountAmount = total * promoDiscount / 100;
   const grandTotal = total - discountAmount + deliveryCharge;
 
@@ -36,8 +41,8 @@ export default function CartPage() {
   if (state.items.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4 font-bangla">আপনার কার্ট খালি</h1>
-        <p className="text-gray-500 mb-8 font-bangla">সুন্দর গহনা দিয়ে কার্ট ভরুন!</p>
+        <h1 className="text-3xl font-bold mb-4 font-bengali">আপনার কার্ট খালি</h1>
+        <p className="text-gray-500 mb-8 font-bengali">সুন্দর গহনা দিয়ে কার্ট ভরুন!</p>
         <Link href="/shop" className="btn-primary">শপ করুন</Link>
       </div>
     );
@@ -45,7 +50,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 font-bangla">শপিং কার্ট</h1>
+      <h1 className="text-3xl font-bold mb-8 font-bengali">শপিং কার্ট</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           {state.items.map(item => {
@@ -60,10 +65,10 @@ export default function CartPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate font-bangla">{item.productName}</h3>
+                  <h3 className="font-semibold truncate font-bengali">{item.productName}</h3>
                   <p className="text-sm text-gray-500">{item.category}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="font-bold text-gold-700">৳{finalPrice.toFixed(0)}</span>
+                    <span className="font-bold text-gold">৳{finalPrice.toFixed(0)}</span>
                     {item.discountPercent > 0 && <span className="text-sm text-gray-400 line-through">৳{item.price}</span>}
                   </div>
                 </div>
@@ -84,13 +89,13 @@ export default function CartPage() {
 
         <div className="lg:col-span-1">
           <div className="card p-6 sticky top-24">
-            <h2 className="text-xl font-semibold mb-4 font-bangla">অর্ডার সামারি</h2>
+            <h2 className="text-xl font-semibold mb-4 font-bengali">অর্ডার সামারি</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between"><span className="text-gray-500">সাবটোটাল</span><span>৳{total.toFixed(0)}</span></div>
               {promoDiscount > 0 && <div className="flex justify-between text-green-600"><span>প্রোমো ({appliedPromo})</span><span>−৳{discountAmount.toFixed(0)}</span></div>}
               <div className="flex justify-between"><span className="text-gray-500">ডেলিভারি</span><span>{deliveryCharge === 0 ? <span className="text-green-600">ফ্রি</span> : `৳${deliveryCharge}`}</span></div>
               {deliveryCharge > 0 && <p className="text-xs text-gray-400">৳১,৫০০+ অর্ডারে ফ্রি ডেলিভারি</p>}
-              <div className="border-t pt-3 flex justify-between font-bold text-lg"><span>মোট</span><span className="text-gold-700">৳{grandTotal.toFixed(0)}</span></div>
+              <div className="border-t pt-3 flex justify-between font-bold text-lg"><span>মোট</span><span className="text-gold">৳{grandTotal.toFixed(0)}</span></div>
             </div>
             <div className="mt-4 flex gap-2">
               <input type="text" value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="প্রোমো কোড" className="input-field text-sm flex-1" />
