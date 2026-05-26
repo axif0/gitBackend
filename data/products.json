@@ -29,5 +29,23 @@
     "stock": 1,
     "isPublished": true,
     "createdAt": "2026-05-26T19:28:07.037Z"
+  },
+  {
+    "id": "test4",
+    "slug": "test4",
+    "name": "test4",
+    "nameEn": "",
+    "description": "trdty",
+    "descriptionEn": "",
+    "price": 4343,
+    "discountPercent": 3,
+    "category": "necklace",
+    "images": [
+      "public/images/1779828785465-images.jpeg"
+    ],
+    "inStock": true,
+    "stock": 1,
+    "isPublished": true,
+    "createdAt": "2026-05-26T20:52:24.765Z"
   }
 ]
