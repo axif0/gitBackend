@@ -1,211 +1,190 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, getFinalPrice } from '@/types/product';
-import ProductForm from '@/components/ProductForm';
-import { TableRowSkeleton } from '@/components/Skeleton';
+import type { Order } from '@/types/order';
+import dynamic from 'next/dynamic';
 import toast, { Toaster } from 'react-hot-toast';
+
+const ProductForm = dynamic(() => import('@/components/ProductForm'), { loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />, ssr: false });
+const ConfirmModal = dynamic(() => import('@/components/ConfirmModal'), { ssr: false });
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleteModal, setDeleteModal] = useState<{ show: boolean; ids: string[] }>({ show: false, ids: [] });
+  const [csrfToken, setCsrfToken] = useState('');
+  const perPage = 10;
 
-  const fetchProducts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/products');
-      if (res.ok) {
-        setProducts(await res.json());
-      }
-    } catch {
-      toast.error('Failed to load products');
-    } finally {
-      setLoading(false);
-    }
+      const [pRes, oRes] = await Promise.all([fetch('/api/admin/products'), fetch('/api/orders')]);
+      if (pRes.ok) setProducts(await pRes.json());
+      if (oRes.ok) setOrders(await oRes.json());
+    } catch { toast.error('ডাটা লোড ব্যর্থ'); } finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchData();
+    fetch('/api/admin/csrf').then(r => r.json()).then(d => { if (d.csrfToken) setCsrfToken(d.csrfToken); }).catch(() => {});
+  }, [fetchData]);
+
+  const analytics = useMemo(() => ({
+    totalProducts: products.length,
+    totalRevenue: orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.grandTotal, 0),
+    pendingOrders: orders.filter(o => o.status === 'pending').length,
+    outOfStock: products.filter(p => p.stock === 0).length,
+  }), [products, orders]);
+
+  const filtered = useMemo(() => products.filter(p => {
+    if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
+    if (search) { const q = search.toLowerCase(); return p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q); }
+    return true;
+  }), [products, categoryFilter, search]);
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
   const handleUploadImage = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = async () => {
         try {
-          const res = await fetch('/api/admin/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              filename: `${Date.now()}-${file.name}`,
-              data: reader.result,
-            }),
-          });
-          if (res.ok) {
-            const { filename } = await res.json();
-            resolve(`public/images/${filename}`);
-          } else {
-            reject(new Error('Upload failed'));
-          }
-        } catch (err) {
-          reject(err);
-        }
+          const res = await fetch('/api/admin/upload', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }, body: JSON.stringify({ filename: `${Date.now()}-${file.name}`, data: reader.result }) });
+          if (res.ok) { const { path } = await res.json(); resolve(path); } else reject(new Error('Upload failed'));
+        } catch (err) { reject(err); }
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.onerror = reject; reader.readAsDataURL(file);
     });
   };
 
   const handleSubmit = async (product: Product, imageFile?: File | null, isEdit?: boolean) => {
     try {
       let images = product.images;
-      if (imageFile) {
-        const path = await handleUploadImage(imageFile);
-        images = [path];
-      }
-
+      if (imageFile) { const path = await handleUploadImage(imageFile); images = [path]; }
       const payload = { ...product, images };
       const editMode = isEdit ?? editing !== null;
-      const optimistic = editMode
-        ? products.map((p) => (p.id === product.id ? payload : p))
-        : [...products, payload];
-
-      setProducts(optimistic);
-      setShowForm(false);
-      setEditing(null);
-
-      const res = await fetch('/api/admin/products', {
-        method: editMode ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Save failed');
-      }
-
-      toast.success(editMode ? 'Product updated!' : 'Product added!');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to save product');
-      fetchProducts();
-    }
+      setProducts(editMode ? products.map(p => p.id === product.id ? payload : p) : [...products, payload]);
+      setShowForm(false); setEditing(null);
+      const res = await fetch('/api/admin/products', { method: editMode ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }, body: JSON.stringify(payload) });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      toast.success(editMode ? 'পণ্য আপডেট হয়েছে!' : 'পণ্য যোগ হয়েছে!');
+    } catch (err) { toast.error(err instanceof Error ? err.message : 'সংরক্ষণ ব্যর্থ'); fetchData(); }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-
-    const prev = products;
-    setProducts(products.filter((p) => p.id !== id));
-    toast.success('Product deleted');
-
+  const confirmDelete = async () => {
+    const ids = deleteModal.ids; const prev = products;
+    setProducts(products.filter(p => !ids.includes(p.id))); setSelectedIds([]); setDeleteModal({ show: false, ids: [] });
     try {
-      const res = await fetch(`/api/admin/products?id=${id}`, { method: 'DELETE' });
+      const url = ids.length === 1 ? `/api/admin/products?id=${ids[0]}` : `/api/admin/products?bulk=${JSON.stringify(ids)}`;
+      const res = await fetch(url, { method: 'DELETE', headers: { 'x-csrf-token': csrfToken } });
       if (!res.ok) throw new Error('Delete failed');
-    } catch {
-      toast.error('Failed to delete');
-      setProducts(prev);
-    }
+      toast.success(`${ids.length}টি পণ্য মুছে ফেলা হয়েছে`);
+    } catch { setProducts(prev); toast.error('মুছে ফেলা ব্যর্থ'); }
+  };
+
+  const handleDuplicate = async (product: Product) => {
+    await handleSubmit({ ...product, id: `${product.id}-copy-${Date.now()}`, slug: `${product.slug}-copy`, name: `কপি - ${product.name}`, createdAt: new Date().toISOString() }, null, false);
+  };
+
+  const togglePublished = async (product: Product) => {
+    const updated = { ...product, isPublished: !product.isPublished };
+    setProducts(products.map(p => p.id === product.id ? updated : p));
+    try {
+      const res = await fetch('/api/admin/products', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }, body: JSON.stringify(updated) });
+      if (!res.ok) throw new Error('Update failed');
+      toast.success(updated.isPublished ? 'প্রকাশিত' : 'অপ্রকাশিত');
+    } catch { setProducts(products); toast.error('আপডেট ব্যর্থ'); }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto">
       <Toaster position="top-right" />
-
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-serif font-bold">Admin Dashboard</h1>
-        <button
-          onClick={() => { setShowForm(true); setEditing(null); }}
-          className="btn-primary"
-        >
-          + Add Product
-        </button>
+        <h1 className="text-3xl font-bold font-bangla">ড্যাশবোর্ড</h1>
+        <button onClick={() => { setShowForm(true); setEditing(null); }} className="btn-primary">+ পণ্য যোগ</button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">মোট পণ্য</p><p className="text-2xl font-bold text-gold-700">{analytics.totalProducts}</p></div>
+        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">মোট আয়</p><p className="text-2xl font-bold text-green-700">৳{analytics.totalRevenue.toLocaleString()}</p></div>
+        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">পেন্ডিং অর্ডার</p><p className="text-2xl font-bold text-yellow-600">{analytics.pendingOrders}</p></div>
+        <div className="card p-5"><p className="text-sm text-gray-500 font-bangla">স্টক শেষ</p><p className="text-2xl font-bold text-red-600">{analytics.outOfStock}</p></div>
       </div>
 
       {showForm && (
         <div className="card p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6">
-            {editing ? 'Edit Product' : 'Add New Product'}
-          </h2>
-          <ProductForm
-            product={editing || undefined}
-            onSubmit={handleSubmit}
-            onCancel={() => { setShowForm(false); setEditing(null); }}
-          />
+          <h2 className="text-xl font-semibold mb-6 font-bangla">{editing ? 'পণ্য আপডেট' : 'নতুন পণ্য'}</h2>
+          <ProductForm product={editing || undefined} onSubmit={handleSubmit} onCancel={() => { setShowForm(false); setEditing(null); }} />
         </div>
       )}
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="পণ্য খুঁজুন..." className="input-field flex-1" />
+        <select value={categoryFilter} onChange={e => { setCategoryFilter(e.target.value); setPage(1); }} className="input-field w-auto">
+          <option value="all">সব ক্যাটাগরি</option>
+          <option value="necklace">নেকলেস</option><option value="ring">রিং</option><option value="bracelet">ব্রেসলেট</option>
+          <option value="earring">ইয়াররিং</option><option value="watch">ঘড়ি</option><option value="other">অন্যান্য</option>
+        </select>
+        {selectedIds.length > 0 && <button onClick={() => setDeleteModal({ show: true, ids: selectedIds })} className="btn-danger">নির্বাচিত মুছুন ({selectedIds.length})</button>}
+      </div>
 
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Final</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-3"><input type="checkbox" checked={selectedIds.length === paginated.length && paginated.length > 0} onChange={() => setSelectedIds(selectedIds.length === paginated.length ? [] : paginated.map(p => p.id))} className="rounded" /></th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">পণ্য</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ক্যাটাগরি</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">মূল্য</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">স্টক</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">প্রকাশিত</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">অ্যাকশন</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} />)
-              ) : products.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
-                    No products yet. Add your first product!
+              {loading ? Array.from({ length: 5 }).map((_, i) => <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-4 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse" /></td>)}</tr>) :
+              paginated.length === 0 ? <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500 font-bangla">কোনো পণ্য নেই</td></tr> :
+              paginated.map(p => (
+                <tr key={p.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-4"><input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => setSelectedIds(prev => prev.includes(p.id) ? prev.filter(i => i !== p.id) : [...prev, p.id])} className="rounded" /></td>
+                  <td className="px-4 py-4"><p className="font-medium text-gray-900 font-bangla">{p.name}</p><p className="text-xs text-gray-500">{p.slug || p.id}</p></td>
+                  <td className="px-4 py-4 text-sm capitalize">{p.category}</td>
+                  <td className="px-4 py-4 text-sm">
+                    <div>৳{getFinalPrice(p).toFixed(0)}</div>
+                    {p.discountPercent > 0 && <span className="text-xs text-red-500 line-through">৳{p.price}</span>}
                   </td>
+                  <td className="px-4 py-4 text-center"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${p.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{p.stock > 0 ? p.stock : 'শেষ'}</span></td>
+                  <td className="px-4 py-4 text-center"><button onClick={() => togglePublished(p)} className={`relative w-11 h-6 rounded-full transition-colors ${p.isPublished ? 'bg-green-500' : 'bg-gray-300'}`}><span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${p.isPublished ? 'translate-x-5' : ''}`} /></button></td>
+                  <td className="px-4 py-4"><div className="flex gap-1 flex-wrap">
+                    <button onClick={() => { setEditing(p); setShowForm(true); }} className="text-gold-600 hover:text-gold-800 text-xs font-medium px-2 py-1">এডিট</button>
+                    <button onClick={() => handleDuplicate(p)} className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1">কপি</button>
+                    <button onClick={() => setDeleteModal({ show: true, ids: [p.id] })} className="text-red-600 hover:text-red-800 text-xs font-medium px-2 py-1">মুছুন</button>
+                  </div></td>
                 </tr>
-              ) : (
-                products.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{p.name}</p>
-                        <p className="text-xs text-gray-500">{p.id}</p>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm capitalize">{p.category}</td>
-                    <td className="px-4 py-4 text-sm">৳{p.price}</td>
-                    <td className="px-4 py-4 text-sm">
-                      {p.discountPercent > 0 ? (
-                        <span className="text-red-600">{p.discountPercent}%</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-sm font-medium">৳{getFinalPrice(p).toFixed(0)}</td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${p.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {p.inStock ? 'In Stock' : 'Out'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { setEditing(p); setShowForm(true); }}
-                          className="text-gold-600 hover:text-gold-800 text-sm font-medium"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button key={i} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-gold-600 text-white' : 'bg-white border hover:bg-gray-50'}`}>{i + 1}</button>
+          ))}
+        </div>
+      )}
+
+      {deleteModal.show && <ConfirmModal title="পণ্য মুছে ফেলুন" message={`${deleteModal.ids.length}টি পণ্য মুছে ফেলতে চান?`} onConfirm={confirmDelete} onCancel={() => setDeleteModal({ show: false, ids: [] })} />}
     </div>
   );
 }
