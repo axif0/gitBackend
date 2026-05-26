@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import { cachedFetch, queueWrite, invalidateCache } from './cache';
 import type { SiteSettings } from '@/lib/schemas';
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -6,6 +7,7 @@ const owner = process.env.GITHUB_OWNER!;
 const repo = process.env.GITHUB_REPO!;
 const branch = process.env.GITHUB_BRANCH || 'main';
 const SETTINGS_PATH = 'data/settings.json';
+const RAW_BASE = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}`;
 
 const DEFAULT_SETTINGS: SiteSettings = {
   siteName: 'পাঁচমিশালি',
@@ -37,24 +39,32 @@ async function getFileSha(path: string): Promise<string | undefined> {
 }
 
 export async function getSettings(): Promise<SiteSettings> {
-  try {
-    const { data } = await octokit.repos.getContent({ owner, repo, path: SETTINGS_PATH, ref: branch });
-    if ('content' in data) {
-      const content = Buffer.from(data.content, 'base64').toString('utf-8');
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(content) };
-    }
+  return cachedFetch('settings', async () => {
+    try {
+      const url = `${RAW_BASE}/${SETTINGS_PATH}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeout);
+      if (res.ok) return { ...DEFAULT_SETTINGS, ...await res.json() };
+    } catch {}
+    try {
+      const { data } = await octokit.repos.getContent({ owner, repo, path: SETTINGS_PATH, ref: branch });
+      if ('content' in data) return { ...DEFAULT_SETTINGS, ...JSON.parse(Buffer.from(data.content, 'base64').toString('utf-8')) };
+    } catch {}
     return DEFAULT_SETTINGS;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
+  });
 }
 
 export async function saveSettings(settings: SiteSettings): Promise<void> {
-  const sha = await getFileSha(SETTINGS_PATH);
-  const content = Buffer.from(JSON.stringify(settings, null, 2)).toString('base64');
-  await octokit.repos.createOrUpdateFileContents({
-    owner, repo, path: SETTINGS_PATH,
-    message: `Update settings - ${new Date().toISOString()}`,
-    content, sha, branch,
+  await queueWrite(async () => {
+    const sha = await getFileSha(SETTINGS_PATH);
+    const content = Buffer.from(JSON.stringify(settings, null, 2)).toString('base64');
+    await octokit.repos.createOrUpdateFileContents({
+      owner, repo, path: SETTINGS_PATH,
+      message: `Update settings - ${new Date().toISOString()}`,
+      content, sha, branch,
+    });
+    invalidateCache('settings');
   });
 }

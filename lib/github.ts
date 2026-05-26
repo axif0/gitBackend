@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { cachedFetch, queueWrite, incrementRead, incrementWrite, invalidateCache } from './cache';
+import { cachedFetch, queueWrite, invalidateCache } from './cache';
 import type { Product } from '@/types/product';
 import type { Order } from '@/types/order';
 
@@ -21,7 +21,7 @@ async function fetchRaw<T>(path: string): Promise<T | null> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(url, { next: { revalidate: 30 }, signal: controller.signal });
+    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
     clearTimeout(timeout);
     if (!res.ok) return null;
     return await res.json() as T;
@@ -47,7 +47,6 @@ async function getFileSha(path: string): Promise<string | undefined> {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  incrementRead();
   return cachedFetch('products', async () => {
     const raw = await fetchRaw<Product[]>(PRODUCTS_PATH);
     if (raw) return raw;
@@ -60,7 +59,6 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function saveProducts(products: Product[]): Promise<void> {
-  incrementWrite();
   await queueWrite(async () => {
     const sha = await getFileSha(PRODUCTS_PATH);
     const content = Buffer.from(JSON.stringify(products, null, 2)).toString('base64');
@@ -73,7 +71,6 @@ export async function saveProducts(products: Product[]): Promise<void> {
 }
 
 export async function getOrders(): Promise<Order[]> {
-  incrementRead();
   return cachedFetch('orders', async () => {
     const raw = await fetchRaw<Order[]>(ORDERS_PATH);
     if (raw) return raw;
@@ -86,7 +83,6 @@ export async function getOrders(): Promise<Order[]> {
 }
 
 export async function saveOrders(orders: Order[]): Promise<void> {
-  incrementWrite();
   await queueWrite(async () => {
     const sha = await getFileSha(ORDERS_PATH);
     const content = Buffer.from(JSON.stringify(orders, null, 2)).toString('base64');
@@ -99,7 +95,6 @@ export async function saveOrders(orders: Order[]): Promise<void> {
 }
 
 export async function uploadImage(filename: string, base64Data: string): Promise<string> {
-  incrementWrite();
   const path = `${IMAGES_DIR}/${filename}`;
   await queueWrite(async () => {
     const sha = await getFileSha(path);
@@ -112,7 +107,6 @@ export async function uploadImage(filename: string, base64Data: string): Promise
 }
 
 export async function uploadFile(path: string, base64Data: string, message: string): Promise<string> {
-  incrementWrite();
   await queueWrite(async () => {
     const sha = await getFileSha(path);
     await fetchWithRetry(() => octokit.repos.createOrUpdateFileContents({
@@ -123,7 +117,6 @@ export async function uploadFile(path: string, base64Data: string, message: stri
 }
 
 export async function deleteImage(filename: string): Promise<void> {
-  incrementWrite();
   const path = `${IMAGES_DIR}/${filename}`;
   await queueWrite(async () => {
     try {
